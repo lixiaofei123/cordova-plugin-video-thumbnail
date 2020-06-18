@@ -35,18 +35,37 @@ import android.util.Base64;
 import android.util.Log;
 
 import java.lang.String;
+import java.nio.charset.StandardCharsets;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Base64;
+
 
 public class VideoThumbnail extends CordovaPlugin {
 
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws Exception {
         try {
             // Action is 'create'
             if (action.equals("create")) {
-                Uri fileURI = Uri.fromFile(new File(args.getString(0)));
-                String filePath = args.getString(0).replace(fileURI.getScheme() + ":", "");
-                Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(filePath, Thumbnails.MINI_KIND);
+            	
+            	Bitmap thumbnail;
+            	String arg0 = args.getString(0);
+            	if(arg0.startsWith("data:")) {  //是base64?
+            		File tempFile = File.createTempFile("video-", ".mp4");
+            		byte[] decodedImg = java.util.Base64.getDecoder()
+                            .decode(arg0.getBytes(StandardCharsets.UTF_8));
+            		FileOutputStream fos = new FileOutputStream(tempFile);
+            		fos.write(decodedImg);
+            		fos.close();
+            		String tempPath = tempFile.getAbsolutePath();
+                    thumbnail = ThumbnailUtils.createVideoThumbnail(tempPath, Thumbnails.MINI_KIND);
+                    tempFile.deleteOnExit();
+            	}else {
+            		 Uri fileURI = Uri.fromFile(new File(args.getString(0)));
+                     String filePath = args.getString(0).replace(fileURI.getScheme() + ":", "");
+                     thumbnail = ThumbnailUtils.createVideoThumbnail(filePath, Thumbnails.MINI_KIND);
+            	}
 
                 callbackContext.success(encodeTobase64(thumbnail));
                 return true;
@@ -66,7 +85,7 @@ public class VideoThumbnail extends CordovaPlugin {
         ByteArrayOutputStream byteArrayData = new ByteArrayOutputStream();  
         bmImage.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayData);
         byte[] byteData = byteArrayData.toByteArray();
-        String encodedImage = Base64.encodeToString(byteData, Base64.DEFAULT);
+        String encodedImage = android.util.Base64.encodeToString(byteData, android.util.Base64.DEFAULT);
 
         return encodedImage;
     }
