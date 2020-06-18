@@ -31,7 +31,6 @@ import android.graphics.Bitmap.CompressFormat;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.provider.MediaStore.Video.Thumbnails;
-import android.util.Base64;
 import android.util.Log;
 
 import java.lang.String;
@@ -51,11 +50,12 @@ public class VideoThumbnail extends CordovaPlugin {
             	
             	Bitmap thumbnail;
             	String arg0 = args.getString(0);
-            	if(arg0.startsWith("data:")) {  //是base64?
+            	if(arg0.startsWith("base64:")) {  //是base64?
             		try {
             			File tempFile = File.createTempFile("video-", ".mp4");
-                		byte[] decodedImg = java.util.Base64.getDecoder()
-                                .decode(arg0.getBytes(StandardCharsets.UTF_8));
+            			arg0 = arg0.replace("base64:", "");
+            			byte[] input = arg0.getBytes(StandardCharsets.UTF_8);
+                		byte[] decodedImg = Base64.decode(input,0,input.length,Base64.DEFAULT);
                 		FileOutputStream fos = new FileOutputStream(tempFile);
                 		fos.write(decodedImg);
                 		fos.close();
@@ -91,7 +91,7 @@ public class VideoThumbnail extends CordovaPlugin {
         ByteArrayOutputStream byteArrayData = new ByteArrayOutputStream();  
         bmImage.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayData);
         byte[] byteData = byteArrayData.toByteArray();
-        String encodedImage = android.util.Base64.encodeToString(byteData, android.util.Base64.DEFAULT);
+        String encodedImage = Base64.encodeToString(byteData, Base64.DEFAULT);
 
         return encodedImage;
     }
