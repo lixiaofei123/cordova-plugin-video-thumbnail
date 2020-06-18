@@ -53,7 +53,6 @@ public class VideoThumbnail extends CordovaPlugin {
             	if(!arg0.startsWith("file:")) {  //是base64?
             		try {
             			File tempFile = File.createTempFile("video-", ".mp4");
-            			arg0 = arg0.replace("base64:", "");
             			byte[] input = arg0.getBytes(StandardCharsets.UTF_8);
                 		byte[] decodedImg = Base64.decode(input,0,input.length,Base64.DEFAULT);
                 		FileOutputStream fos = new FileOutputStream(tempFile);
