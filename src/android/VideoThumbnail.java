@@ -38,7 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Base64;
+import android.util.Base64;
 
 
 public class VideoThumbnail extends CordovaPlugin {
