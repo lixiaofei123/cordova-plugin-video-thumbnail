@@ -44,7 +44,7 @@ import java.util.Base64;
 
 public class VideoThumbnail extends CordovaPlugin {
 
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws Exception {
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         try {
             // Action is 'create'
             if (action.equals("create")) {
@@ -52,15 +52,21 @@ public class VideoThumbnail extends CordovaPlugin {
             	Bitmap thumbnail;
             	String arg0 = args.getString(0);
             	if(arg0.startsWith("data:")) {  //是base64?
-            		File tempFile = File.createTempFile("video-", ".mp4");
-            		byte[] decodedImg = java.util.Base64.getDecoder()
-                            .decode(arg0.getBytes(StandardCharsets.UTF_8));
-            		FileOutputStream fos = new FileOutputStream(tempFile);
-            		fos.write(decodedImg);
-            		fos.close();
-            		String tempPath = tempFile.getAbsolutePath();
-                    thumbnail = ThumbnailUtils.createVideoThumbnail(tempPath, Thumbnails.MINI_KIND);
-                    tempFile.deleteOnExit();
+            		try {
+            			File tempFile = File.createTempFile("video-", ".mp4");
+                		byte[] decodedImg = java.util.Base64.getDecoder()
+                                .decode(arg0.getBytes(StandardCharsets.UTF_8));
+                		FileOutputStream fos = new FileOutputStream(tempFile);
+                		fos.write(decodedImg);
+                		fos.close();
+                		String tempPath = tempFile.getAbsolutePath();
+                        thumbnail = ThumbnailUtils.createVideoThumbnail(tempPath, Thumbnails.MINI_KIND);
+                        tempFile.deleteOnExit();
+            		}catch (Exception e) {
+            			 callbackContext.error("Invalid action");
+                         return false;
+					}
+            		
             	}else {
             		 Uri fileURI = Uri.fromFile(new File(args.getString(0)));
                      String filePath = args.getString(0).replace(fileURI.getScheme() + ":", "");
